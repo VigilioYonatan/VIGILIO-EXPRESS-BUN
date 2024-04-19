@@ -1,8 +1,14 @@
 import { useContext } from "preact/hooks";
 import { FormControlContext } from "./Form";
-import { JSX } from "preact";
-import { Path, RegisterOptions, UseFormReturn } from "react-hook-form";
-import { HTMLAttributes } from "preact/compat";
+import { type JSX } from "preact";
+import {
+	type FieldErrors,
+	type FieldValues,
+	type Path,
+	type RegisterOptions,
+	type UseFormReturn,
+} from "react-hook-form";
+import { type HTMLAttributes } from "preact/compat";
 
 interface FormControlLabelProps<T extends object>
 	extends Omit<HTMLAttributes<HTMLSelectElement>, "type" | "name"> {
@@ -29,10 +35,24 @@ function FormSelect<T extends object>({
 		register,
 		getValues,
 		formState: { errors },
-	} = useContext<UseFormReturn<T, unknown, undefined>>(FormControlContext);
+	} = useContext<UseFormReturn<T, unknown, FieldValues>>(FormControlContext);
+	function anidarPropiedades(obj: FieldErrors<T>, keysArray: string[]) {
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		let currentObj: any = obj;
+		for (let i = 0; i < keysArray.length; i++) {
+			const key = keysArray[i];
+			// biome-ignore lint/suspicious/noPrototypeBuiltins: <explanation>
+			if (!currentObj.hasOwnProperty(key)) {
+				currentObj[key] = {}; // Crear un objeto vacío si la propiedad no existe
+			}
+			currentObj = currentObj[key]; // Moverse al siguiente nivel del objeto
+		}
+		return currentObj;
+	}
+	const err = anidarPropiedades(errors, (name as string).split("."));
 
 	return (
-		<div class="lg:mb-2 w-full h-[95px]">
+		<div class="lg:mb-2 w-full mb-2">
 			<label
 				class="text-xs dark:text-secondary-light text-secondary-dark capitalize font-semibold"
 				htmlFor={name as string}
@@ -42,8 +62,10 @@ function FormSelect<T extends object>({
 			<div class="flex items-center gap-2">
 				<div
 					class={`${
-						(errors as T)[name] ? "border border-red-600" : ""
-					} w-full h-[2.5rem] flex items-center text-xs rounded-lg  overflow-hidden dark:text-secondary-light text-secondary-dark dark:bg-admin-terciary bg-paper-light my-1 shadow-sm border border-gray-200 dark:border-gray-600`}
+						Object.keys(err).length
+							? "border border-red-600"
+							: "border border-gray-200 dark:border-gray-600"
+					} w-full h-[2.5rem] flex items-center text-xs rounded-lg  overflow-hidden dark:text-secondary-light text-secondary-dark dark:bg-admin-terciary bg-paper-light my-1 shadow-sm `}
 				>
 					{ico ? (
 						<div class="dark:bg-admin-background-dark bg-background-light  shadow min-w-[2.8rem]  h-full flex justify-center items-center">
@@ -54,11 +76,18 @@ function FormSelect<T extends object>({
 						id={name as string}
 						class={`${
 							(errors as T)[name] ? "border-red-600" : ""
-						}  bg-transparent  my-1 text-sm w-full outline-none shadow-sm`}
+						}  bg-transparent font-normal my-1 text-sm w-full outline-none shadow-sm`}
 						{...rest}
 						{...register(name as unknown as Path<T>, options)}
 					>
-						<option class="text-black" value="">
+						<option
+							class="text-black"
+							selected={
+								Number.isNaN(getValues(name as unknown as Path<T>)) ||
+								getValues(name as unknown as Path<T>) === null
+							}
+							value=""
+						>
 							{placeholder}
 						</option>
 						{array.map(({ value, key }) => (
@@ -76,14 +105,14 @@ function FormSelect<T extends object>({
 				{question ? (
 					<div class="relative group ">
 						<i class="fa-solid fa-circle-question text-xs dark:text-white" />
-						<div class="text-[9px] min-w-[100px] hidden group-hover:block -top-[35px] right-1 p-1 shadow text-center absolute rounded-md dark:bg-admin-background-dark bg-background-light dark:text-white">
+						<div class="text-xs min-w-[100px] hidden group-hover:block -top-[35px] right-1 p-1 shadow text-center absolute rounded-md dark:bg-admin-background-dark bg-background-light dark:text-white">
 							{question}
 						</div>
 					</div>
 				) : null}
 			</div>
-			{(errors as T)[name] ? (
-				<p class="text-xs text-red-600">{errors[name]?.message}</p>
+			{Object.keys(err).length ? (
+				<p class="text-xs text-red-600">{err?.message}</p>
 			) : null}
 		</div>
 	);

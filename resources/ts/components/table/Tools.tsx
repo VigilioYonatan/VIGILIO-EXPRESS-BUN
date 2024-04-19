@@ -6,11 +6,15 @@ interface ToolsProps {
 	onRemoveAll?: (props: number[]) => void;
 	hiddenInput?: boolean;
 	hiddenDelete?: boolean;
+	hiddenFetching?: boolean;
+	placeholderSearch?: string;
 }
 function Tools({
 	onRemoveAll,
 	hiddenInput = false,
 	hiddenDelete = false,
+	hiddenFetching = false,
+	placeholderSearch = "Buscar...",
 }: ToolsProps) {
 	const table = useContext(VigilioTableContext);
 
@@ -40,7 +44,7 @@ function Tools({
 								}
 								value={table.search.value}
 								id="table-search-users"
-								placeholder="Buscar por id o nombre"
+								placeholder={placeholderSearch}
 							/>
 						</search>
 					</div>
@@ -58,6 +62,11 @@ function Tools({
 							<i class="fas fa-trash" />
 						</button>
 					) : null}
+				</div>
+			) : null}
+			{!hiddenFetching ? (
+				<div class="flex gap-4 items-center">
+					{table.isFetching ? <span>Cargando...</span> : null}
 				</div>
 			) : null}
 		</div>

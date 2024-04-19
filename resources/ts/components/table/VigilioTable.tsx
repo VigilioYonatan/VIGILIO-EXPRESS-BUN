@@ -1,8 +1,9 @@
+import Loading from "@/admin/components/Loading";
 import { type UseQuery } from "@vigilio/preact-fetching";
 import { type UseTable } from "@vigilio/preact-table";
 import { createContext } from "preact";
 import { useEffect } from "preact/hooks";
-import { JSX } from "preact/jsx-runtime";
+import { type JSX } from "preact/jsx-runtime";
 
 export const vigilioTableContext = <
 	T extends object,
@@ -12,7 +13,8 @@ export const vigilioTableContext = <
 >() => {
 	return createContext(
 		{} as UseTable<T, K, Y> & {
-			refetch: (clean?: boolean | undefined) => Promise<void>;
+			refetch: (clean?: boolean) => void;
+			isFetching: boolean | null;
 		},
 	);
 };
@@ -23,15 +25,11 @@ interface VigilioTableProps<
 	Y extends object,
 > {
 	query: UseQuery<
-		object,
-		{
-			success: boolean;
-			message: string;
-			params: string;
-		}
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		any,
+		unknown
 	>;
 	table: UseTable<T, K, Y>;
-
 	children: JSX.Element | JSX.Element[];
 }
 function VigilioTable<T extends object, K extends string, Y extends object>({
@@ -39,20 +37,19 @@ function VigilioTable<T extends object, K extends string, Y extends object>({
 	table,
 	children,
 }: VigilioTableProps<T, K, Y>) {
-	useEffect(() => {
-		query.refetch(false);
-	}, [
-		table.pagination.page,
-		table.pagination.value.limit,
-		table.sort.value,
-		table.search.debounceTerm,
-	]);
-
 	let component: null | JSX.Element | JSX.Element[] = null;
 	if (query.isLoading) {
-		component = <span>Cargando</span>;
+		component = <Loading />;
 	}
 	if (query.isSuccess) {
+		useEffect(() => {
+			query.refetch(false);
+		}, [
+			table.pagination.page,
+			table.pagination.value.limit,
+			table.sort.value,
+			table.search.debounceTerm,
+		]);
 		component = children;
 	}
 	if (query.isError) {

@@ -1,5 +1,5 @@
-import { JSX } from "preact/jsx-runtime";
-import useDropdown, { UseDropdown } from "~/hooks/useDropdown";
+import { type JSX } from "preact/jsx-runtime";
+import useDropdown, { type UseDropdown } from "~/hooks/useDropdown";
 
 interface WebDropdownProps {
 	children: JSX.Element | JSX.Element[];

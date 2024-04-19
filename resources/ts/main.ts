@@ -12,3 +12,7 @@ render(
 	"App",
 	lazy(() => import("./App")),
 );
+render(
+	"Counter",
+	lazy(() => import("@/web/Counter")),
+);

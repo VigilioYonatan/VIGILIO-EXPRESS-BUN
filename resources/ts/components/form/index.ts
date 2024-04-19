@@ -9,13 +9,17 @@ import FormSelect from "./FormSelect";
 import FormTextArea from "./FormTextArea";
 import WebFormControl from "./WebFormControl";
 import WebFormTextArea from "./WebFormTextArea";
+import WebFormSelect from "./WebFormSelect";
 
 const Form = Object.assign(VigilioForm, {
 	control: Object.assign(FormControl, {
 		file: FormFile,
 		select: FormSelect,
 		area: FormTextArea,
-		web: Object.assign(WebFormControl, { area: WebFormTextArea }),
+		web: Object.assign(WebFormControl, {
+			area: WebFormTextArea,
+			select: WebFormSelect,
+		}),
 		auth: authFormControl,
 		toggle: FormRadio,
 	}),

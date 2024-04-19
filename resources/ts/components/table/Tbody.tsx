@@ -1,4 +1,4 @@
-import { JSX } from "preact/jsx-runtime";
+import { type JSX } from "preact/jsx-runtime";
 interface TbodyProps {
 	className?: string;
 	children: JSX.Element | JSX.Element[];

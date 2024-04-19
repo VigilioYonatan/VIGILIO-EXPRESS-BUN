@@ -2,10 +2,12 @@ import { useCallback, useContext } from "preact/hooks";
 import { useSignal } from "@preact/signals";
 import { FormControlContext } from "./Form";
 import {
-	Path,
-	PathValue,
-	RegisterOptions,
-	UseFormReturn,
+	type FieldErrors,
+	type FieldValues,
+	type Path,
+	type PathValue,
+	type RegisterOptions,
+	type UseFormReturn,
 } from "react-hook-form";
 interface FormFileProps<T extends object> {
 	title: string;
@@ -26,7 +28,7 @@ function FormFile<T extends object>({
 	options,
 }: FormFileProps<T>) {
 	const form =
-		useContext<UseFormReturn<T, unknown, undefined>>(FormControlContext);
+		useContext<UseFormReturn<T, unknown, FieldValues>>(FormControlContext);
 	const isDrag = useSignal<boolean>(false);
 	const files = form.watch(name as unknown as Path<T>);
 
@@ -54,7 +56,7 @@ function FormFile<T extends object>({
 			name as unknown as Path<T>,
 			filterImages.length
 				? (filterImages as PathValue<T, Path<T>>)
-				: (undefined as PathValue<T, Path<T>>),
+				: (null as PathValue<T, Path<T>>),
 			{ shouldValidate: true },
 		);
 	}
@@ -87,7 +89,7 @@ function FormFile<T extends object>({
 						onClick={(e) => e.preventDefault()}
 						class="w-[90px] h-[70px] relative flex justify-center items-center group"
 					>
-						<div class="absolute top-0 left-0 right-0 bottom-0 w-full h-full rounded-md overflow-hidden">
+						<div class="absolute top-0 left-0 right-0 bottom-0 w-full h-full rounded-md overflow-hidden flex justify-center items-center">
 							{typeFile instanceof Object && typeFile.value ? (
 								<img
 									alt=""
@@ -110,15 +112,8 @@ function FormFile<T extends object>({
 								<video width="150" height="150" src={printImageBlog(file)} />
 							) : null}
 							{typeFile === "file" ? (
-								<img
-									alt=""
-									src="/file.png"
-									class="dropzone-vigilio__imgerror"
-									width="60"
-								/>
+								<i class="fas fa-file-alt text-4xl text-secondary-dark dark:text-secondary-light mb-3" />
 							) : null}
-
-							<i class="far fa-file-image" />
 						</div>
 
 						<button
@@ -144,17 +139,34 @@ function FormFile<T extends object>({
 			</>
 		);
 	}
-
+	function anidarPropiedades(obj: FieldErrors<T>, keysArray: string[]) {
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		let currentObj: any = obj;
+		for (let i = 0; i < keysArray.length; i++) {
+			const key = keysArray[i];
+			// biome-ignore lint/suspicious/noPrototypeBuiltins: <explanation>
+			if (!currentObj.hasOwnProperty(key)) {
+				currentObj[key] = {}; // Crear un objeto vacío si la propiedad no existe
+			}
+			currentObj = currentObj[key]; // Moverse al siguiente nivel del objeto
+		}
+		return currentObj;
+	}
+	const err = anidarPropiedades(
+		form.formState.errors,
+		(name as string).split("."),
+	);
+	const nameCustom = `${name as string}${Date.now().toString(32).slice(4)}`;
 	return (
 		<div class="w-full lg:mb-2">
 			<label
 				class="text-xs dark:text-secondary-light text-secondary-dark capitalize font-semibold"
-				htmlFor={name as string}
+				htmlFor={nameCustom}
 			>
 				{title}
 			</label>
 			<input
-				id={name as string}
+				id={nameCustom as string}
 				hidden={true}
 				type="file"
 				multiple={multiple}
@@ -174,8 +186,8 @@ function FormFile<T extends object>({
 				draggable={true}
 				onDragOver={onDragEnter}
 				onDragLeave={onDragLeave}
-				htmlFor={name as unknown as Path<T>}
-				class={`${(form.formState.errors as T)[name] ? "border-danger" : ""} ${
+				htmlFor={nameCustom as unknown as Path<T>}
+				class={`${Object.keys(err).length ? "border-danger" : ""} ${
 					isDrag.value ? "border-primary" : ""
 				} flex  w-full flex-col items-center py-6 justify-center min-h-[180px] border-2 border-dashed rounded-lg cursor-pointer dark:bg-admin-terciary bg-paper-light max-w-full min-w-[250px] my-2  shadow-sm border-gray-200 dark:border-gray-600`}
 			>
@@ -191,6 +203,8 @@ function FormFile<T extends object>({
 									) : null}
 									{typeFile === "video" ? (
 										<i class="fas fa-photo-video text-4xl text-secondary-dark dark:text-secondary-light mb-3" />
+									) : typeFile === "file" ? (
+										<i class="fas fa-file-alt text-4xl text-secondary-dark dark:text-secondary-light mb-3" />
 									) : null}
 									<p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
 										<span class="font-semibold">Arrastra</span>y suelta los
@@ -204,6 +218,8 @@ function FormFile<T extends object>({
 									) : null}
 									{typeFile === "video" ? (
 										<i class="fas fa-photo-video text-4xl text-secondary-dark dark:text-secondary-light mb-3" />
+									) : typeFile === "file" ? (
+										<i class="fas fa-file-alt  text-4xl text-secondary-dark dark:text-secondary-light mb-3" />
 									) : null}
 
 									<p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
@@ -219,10 +235,8 @@ function FormFile<T extends object>({
 					)}
 				</div>
 			</label>
-			{(form.formState.errors as T)[name] ? (
-				<p class="text-xs text-red-600">
-					{form.formState.errors[name]?.message}
-				</p>
+			{Object.keys(err).length ? (
+				<p class="text-xs text-red-600">{err?.message}</p>
 			) : null}
 			<style jsx>{`
                 input::file-selector-button {

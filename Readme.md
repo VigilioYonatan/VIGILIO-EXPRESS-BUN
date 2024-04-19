@@ -65,6 +65,8 @@ docker compose down
 4. Si modificaste package.json (instalar o desintalar dependencia ) Detener contenedor de la imagen "docker compose down" y instalar dependencia pnpm add \*. Volver a construir contenedor y iniciar contenedor
 
 ```BASH
+# Desde el terminal del contenedor puedes instalar la nueva dependencia y tambien instalar el de local
+# ó
 # volver a contruir construir contenedor y iniciar
 docker compose up -d --build
 ```

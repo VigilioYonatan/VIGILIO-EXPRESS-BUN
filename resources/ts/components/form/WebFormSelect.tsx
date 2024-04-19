@@ -1,4 +1,4 @@
-import { useContext, useState } from "preact/hooks";
+import { useContext } from "preact/hooks";
 import { FormControlContext } from "./Form";
 import { type JSX } from "preact";
 import {
@@ -10,33 +10,32 @@ import {
 } from "react-hook-form";
 import { type HTMLAttributes } from "preact/compat";
 
-interface WebFormControlLabelProps<T extends object>
-	extends Omit<HTMLAttributes<HTMLInputElement>, "type" | "name"> {
+interface FormControlLabelProps<T extends object>
+	extends Omit<HTMLAttributes<HTMLSelectElement>, "type" | "name"> {
 	title: string;
 	name: keyof T;
-	type?: HTMLInputElement["type"];
 	question?: JSX.Element | JSX.Element[] | string;
 	options?: RegisterOptions<T, Path<T>>;
+	placeholder: string;
 	ico?: JSX.Element | JSX.Element[];
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	array: { value: string; key: any }[];
 }
-function WebFormControl<T extends object>({
+function WebFormSelect<T extends object>({
 	name,
 	title,
-	type = "text",
 	question,
 	options = {},
+	array,
+	placeholder,
 	ico,
 	...rest
-}: WebFormControlLabelProps<T>) {
+}: FormControlLabelProps<T>) {
 	const {
 		register,
+		getValues,
 		formState: { errors },
 	} = useContext<UseFormReturn<T, unknown, FieldValues>>(FormControlContext);
-	const [hidden, useHidden] = useState(true);
-
-	function onChangeHidde() {
-		useHidden(!hidden);
-	}
 	function anidarPropiedades(obj: FieldErrors<T>, keysArray: string[]) {
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		let currentObj: any = obj;
@@ -53,9 +52,9 @@ function WebFormControl<T extends object>({
 	const err = anidarPropiedades(errors, (name as string).split("."));
 
 	return (
-		<div class="w-full h-[85px]">
+		<div class="lg:mb-2 w-full mb-2">
 			<label
-				class="text-xs  text-secondary-dark dark:text-secondary-light capitalize font-semibold"
+				class="text-xs dark:text-secondary-light text-secondary-dark capitalize font-semibold"
 				htmlFor={name as string}
 			>
 				{title}
@@ -63,35 +62,43 @@ function WebFormControl<T extends object>({
 			<div class="flex items-center gap-2">
 				<div
 					class={`${
-						Object.keys(err).length ? "border-red-600" : ""
-					} w-full h-[2.5rem] flex  items-center gap-2 text-xs rounded-md  overflow-hidden text-secondary-dark   my-1 shadow-sm border `}
+						Object.keys(err).length ? "border border-red-600" : ""
+					} w-full h-[2.5rem] flex items-center text-xs rounded-lg  overflow-hidden dark:text-secondary-light text-secondary-dark dark:bg-admin-terciary bg-paper-light my-1 shadow-sm border border-gray-200 dark:border-gray-600`}
 				>
 					{ico ? (
-						<div class="bg-primary shadow min-w-[2.8rem]  h-full text-white flex justify-center items-center">
+						<div class="bg-primary  shadow min-w-[2.8rem]  h-full flex justify-center items-center text-white">
 							{ico}
 						</div>
 					) : null}
-					<input
-						class="outline-none bg-transparent h-full w-full dark:text-secondary-light text-secondary-dark px-2 sm:text-sm "
+					<select
 						id={name as string}
-						type={hidden ? type : "text"}
+						class={`${
+							(errors as T)[name] ? "border-red-600" : ""
+						}  bg-transparent  my-1 text-sm w-full outline-none shadow-sm`}
 						{...rest}
 						{...register(name as unknown as Path<T>, options)}
-					/>
-					{type === "password" ? (
-						<button
-							type="button"
-							aria-label="change password button eye"
-							onClick={onChangeHidde}
-							class="mr-4 text-secondary-dark dark:text-secondary-light"
+					>
+						<option
+							class="text-black"
+							selected={
+								Number.isNaN(getValues(name as unknown as Path<T>)) ||
+								getValues(name as unknown as Path<T>) === null
+							}
+							value=""
 						>
-							{hidden ? (
-								<i class="fas fa-eye" />
-							) : (
-								<i class="fas fa-eye-slash" />
-							)}
-						</button>
-					) : null}
+							{placeholder}
+						</option>
+						{array.map(({ value, key }) => (
+							<option
+								selected={getValues(name as unknown as Path<T>) === key}
+								class="text-black"
+								value={key}
+								key={key}
+							>
+								{value}
+							</option>
+						))}
+					</select>
 				</div>
 				{question ? (
 					<div class="relative group ">
@@ -103,11 +110,10 @@ function WebFormControl<T extends object>({
 				) : null}
 			</div>
 			{Object.keys(err).length ? (
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-				<p class="text-xs text-red-600">{(err as any).message}</p>
+				<p class="text-xs text-red-600">{err?.message}</p>
 			) : null}
 		</div>
 	);
 }
 
-export default WebFormControl;
+export default WebFormSelect;

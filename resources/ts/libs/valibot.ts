@@ -1,7 +1,16 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Resolver } from "react-hook-form";
+import { type Resolver } from "react-hook-form";
 import { getOutput, getPipeIssues } from "valibot";
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+function serializeValue(values: any) {
+	return Object.fromEntries(
+		Object.entries(values).map(([key, value]) => {
+			const updatedValue = value === "" ? null : value;
+			return [key, updatedValue];
+		}),
+	);
+}
 /**
  * customize validacion of valibot. react hook form not recognized optional
  in valibot
@@ -12,7 +21,12 @@ export const valibotVigilio = (schema: any): Resolver<any, any> => {
 	return (values, ...args) => {
 		const defaultValues = Object.fromEntries(
 			Object.entries(values).map(([key, value]) => {
-				const updatedValue = value === "" ? null : value;
+				const updatedValue =
+					value === ""
+						? null
+						: value instanceof Object && !Array.isArray(value) //si es objeto y no array
+						  ? serializeValue(value)
+						  : value;
 				return [key, updatedValue];
 			}),
 		);

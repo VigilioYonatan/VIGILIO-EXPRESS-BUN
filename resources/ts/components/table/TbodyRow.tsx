@@ -1,6 +1,6 @@
 import { useContext } from "preact/hooks";
 import { VigilioTableContext } from "./VigilioTable";
-import { JSX } from "preact/jsx-runtime";
+import { type JSX } from "preact/jsx-runtime";
 interface TbodyRowProps<T extends object> {
 	className?: string;
 	handleClick?: (data: T) => void;

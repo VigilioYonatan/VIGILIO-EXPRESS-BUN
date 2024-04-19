@@ -2,6 +2,8 @@ import { useContext, useState } from "preact/hooks";
 import { FormControlContext } from "./Form";
 import { type JSX } from "preact";
 import {
+	type FieldErrors,
+	type FieldValues,
 	type Path,
 	type RegisterOptions,
 	type UseFormReturn,
@@ -29,14 +31,29 @@ function authFormControl<T extends object>({
 	const {
 		register,
 		formState: { errors },
-	} = useContext<UseFormReturn<T, unknown, undefined>>(FormControlContext);
+	} = useContext<UseFormReturn<T, unknown, FieldValues>>(FormControlContext);
 	const [hidden, useHidden] = useState(true);
 
 	function onChangeHidde() {
 		useHidden(!hidden);
 	}
+	function anidarPropiedades(obj: FieldErrors<T>, keysArray: string[]) {
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		let currentObj: any = obj;
+		for (let i = 0; i < keysArray.length; i++) {
+			const key = keysArray[i];
+			// biome-ignore lint/suspicious/noPrototypeBuiltins: <explanation>
+			if (!currentObj.hasOwnProperty(key)) {
+				currentObj[key] = {}; // Crear un objeto vacío si la propiedad no existe
+			}
+			currentObj = currentObj[key]; // Moverse al siguiente nivel del objeto
+		}
+		return currentObj;
+	}
+	const err = anidarPropiedades(errors, (name as string).split("."));
+
 	return (
-		<div class="w-full h-[95px]">
+		<div class="w-full h-[85px]">
 			<label
 				class="text-xs dark:text-secondary-light text-secondary-dark capitalize font-semibold"
 				htmlFor={name as string}
@@ -46,7 +63,7 @@ function authFormControl<T extends object>({
 			<div class="flex items-center gap-2">
 				<div
 					class={`${
-						(errors as T)[name] ? "border border-red-600" : ""
+						Object.keys(err).length ? "border border-red-600" : ""
 					} w-full h-[2.5rem] flex items-center gap-2 text-xs rounded-sm  overflow-hidden dark:text-secondary-light text-secondary-dark dark:bg-background-dark bg-paper-light my-1 shadow-sm border border-gray-200 dark:border-gray-600`}
 				>
 					{ico ? (
@@ -76,18 +93,17 @@ function authFormControl<T extends object>({
 						</button>
 					) : null}
 				</div>
-
 				{question ? (
 					<div class="relative group ">
 						<i class="fa-solid fa-circle-question text-xs dark:text-white" />
-						<span class="text-[9px] min-w-[100px] hidden group-hover:block -top-[35px] right-1 p-1 shadow dark:bg-background-dark text-center absolute rounded-md dark:text-white bg-background-light">
+						<div class="text-xs min-w-[100px] hidden group-hover:block -top-[35px] right-1 p-1 shadow text-center absolute rounded-md dark:bg-admin-background-dark bg-background-light dark:text-white">
 							{question}
-						</span>
+						</div>
 					</div>
 				) : null}
 			</div>
-			{(errors as T)[name] ? (
-				<p class="text-xs text-red-600">{errors[name]?.message}</p>
+			{Object.keys(err).length ? (
+				<p class="text-xs text-red-600">{err?.message}</p>
 			) : null}
 		</div>
 	);
