@@ -9,10 +9,14 @@ import render from "./libs/preact";
 Alpine.start();
 AOS.init();
 render(
-	"App",
-	lazy(() => import("./App")),
+    "App",
+    lazy(() => import("./App"))
 );
 render(
-	"Counter",
-	lazy(() => import("@/web/Counter")),
+    "Counter",
+    lazy(() => import("@/web/Counter"))
+);
+render(
+    "FormExample",
+    lazy(() => import("@/web/FormExample"))
 );

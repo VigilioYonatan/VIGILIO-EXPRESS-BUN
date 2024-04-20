@@ -1,4 +1,4 @@
-FROM oven/bun:debian as base
+FROM oven/bun:1.1.4-debian as base
 WORKDIR /usr/src/app
 
 FROM base AS dependencies

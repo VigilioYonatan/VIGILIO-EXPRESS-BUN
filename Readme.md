@@ -30,7 +30,7 @@ bun install
 2. Iniciar contenedor
 
 ```bash
-bun compose up -d
+docker compose up -d
 ```
 
 Abrir vite
