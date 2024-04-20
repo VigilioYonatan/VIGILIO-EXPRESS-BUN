@@ -187,6 +187,11 @@ function UserCard({ user, onUserDelete, onUserUpdate }: UserCardProps) {
                     height={40}
                     alt={user.name}
                 />
+                <div
+                    class={`${
+                        user.enabled ? "bg-success" : "bg-danger"
+                    } w-[10px] h-[10px] rounded-full`}
+                />
                 <div class="flex gap-2">
                     <button
                         class="bg-orange-600 px-4 py-1 rounded-md text-white"
