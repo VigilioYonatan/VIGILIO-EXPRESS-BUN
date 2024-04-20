@@ -76,6 +76,7 @@ function FormExample() {
             icon: "success",
             title: `Se agregó nuevo usuario <b>${body.name}</b>`,
         });
+        usersUpdateId.value = null;
     }
     function onUserDelete(id: string) {
         users.value = users.value.filter((user) => user.id !== id);
