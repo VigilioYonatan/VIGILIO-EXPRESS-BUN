@@ -1,15 +1,21 @@
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { type Resolver } from "react-hook-form";
-import { getOutput, getPipeIssues } from "valibot";
+import { getOutput, getPipeIssues } from "@vigilio/valibot";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function serializeValue(values: any) {
-	return Object.fromEntries(
-		Object.entries(values).map(([key, value]) => {
-			const updatedValue = value === "" ? null : value;
-			return [key, updatedValue];
-		}),
-	);
+    return Object.fromEntries(
+        Object.entries(values).map(([key, value]) => {
+            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            const updatedValue: any =
+                value === ""
+                    ? null
+                    : value instanceof Object && !Array.isArray(value) //si es objeto y no array
+                    ? serializeValue(value)
+                    : value;
+            return [key, updatedValue];
+        })
+    );
 }
 /**
  * customize validacion of valibot. react hook form not recognized optional
@@ -18,20 +24,9 @@ function serializeValue(values: any) {
  */
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export const valibotVigilio = (schema: any): Resolver<any, any> => {
-	return (values, ...args) => {
-		const defaultValues = Object.fromEntries(
-			Object.entries(values).map(([key, value]) => {
-				const updatedValue =
-					value === ""
-						? null
-						: value instanceof Object && !Array.isArray(value) //si es objeto y no array
-						  ? serializeValue(value)
-						  : value;
-				return [key, updatedValue];
-			}),
-		);
-		return valibotResolver(schema)(defaultValues, ...args);
-	};
+    return (values, ...args) => {
+        return valibotResolver(schema)(serializeValue(values), ...args);
+    };
 };
 
 /**
@@ -45,85 +40,87 @@ export const valibotVigilio = (schema: any): Resolver<any, any> => {
  *  @property {number} minSize - min sizes files that upload to serve
  */
 function validFileValibot(props: {
-	required: boolean;
-	min: number;
-	max?: number;
-	types?: string[];
-	maxSize?: number;
-	minSize?: number;
+    required: boolean;
+    min: number;
+    max?: number;
+    types?: string[];
+    maxSize?: number;
+    minSize?: number;
 }) {
-	return (files: File[]) => {
-		const {
-			required,
-			max = null,
-			maxSize,
-			min,
-			minSize = 0.0001,
-			types = [
-				"image/jpg",
-				"image/png",
-				"image/webp",
-				"image/gif",
-				"image/jpeg",
-			],
-		} = props;
+    return (files: File[]) => {
+        const {
+            required,
+            max = null,
+            maxSize,
+            min,
+            minSize = 0.0001,
+            types = [
+                "image/jpg",
+                "image/png",
+                "image/webp",
+                "image/gif",
+                "image/jpeg",
+            ],
+        } = props;
 
-		if (required && !files.length) {
-			return getPipeIssues("custom", "Este campo es obligatorio", files);
-		}
-		if (max) {
-			if (files.length > max) {
-				return getPipeIssues(
-					"custom",
-					`Este campo solo permite maximo ${max} archivos`,
-					files,
-				);
-			}
-		}
-		if (min) {
-			if (files.length < min) {
-				return getPipeIssues(
-					"custom",
-					`Este campo solo permite minimo ${min} archivos`,
-					files,
-				);
-			}
-		}
+        if (required && !files.length) {
+            return getPipeIssues("custom", "Este campo es obligatorio", files);
+        }
+        if (max) {
+            if (files.length > max) {
+                return getPipeIssues(
+                    "custom",
+                    `Este campo solo permite maximo ${max} archivos`,
+                    files
+                );
+            }
+        }
+        if (min) {
+            if (files.length < min) {
+                return getPipeIssues(
+                    "custom",
+                    `Este campo solo permite minimo ${min} archivos`,
+                    files
+                );
+            }
+        }
 
-		for (const file of files) {
-			if (!types.includes(file.type)) {
-				return getPipeIssues(
-					"custom",
-					`Este campo solo permite archivos de formato ${types.join(", ")}`,
-					files,
-				);
-			}
-			const mb = 1000000;
-			const size = file.size;
-			if (maxSize && size > maxSize * mb) {
-				return getPipeIssues(
-					"custom",
-					`Este archivo es demasiado pesado ${file.name.slice(
-						0,
-						12,
-					)}. Máximo ${maxSize} MB`,
-					files,
-				);
-			}
+        for (const file of files) {
+            if (!types.includes(file.type)) {
+                return getPipeIssues(
+                    "custom",
+                    `Este campo solo permite archivos de formato ${types.join(
+                        ", "
+                    )}`,
+                    files
+                );
+            }
+            const mb = 1000000;
+            const size = file.size;
+            if (maxSize && size > maxSize * mb) {
+                return getPipeIssues(
+                    "custom",
+                    `Este archivo es demasiado pesado ${file.name.slice(
+                        0,
+                        12
+                    )}. Máximo ${maxSize} MB`,
+                    files
+                );
+            }
 
-			if (minSize && size < minSize * mb) {
-				return getPipeIssues(
-					"custom",
-					`Este archivo es demasiado ligero ${file.name.slice(
-						0,
-						12,
-					)}. Mínimo ${minSize} MB`,
-					files,
-				);
-			}
-		}
+            if (minSize && size < minSize * mb) {
+                return getPipeIssues(
+                    "custom",
+                    `Este archivo es demasiado ligero ${file.name.slice(
+                        0,
+                        12
+                    )}. Mínimo ${minSize} MB`,
+                    files
+                );
+            }
+        }
 
-		return getOutput(files);
-	};
+        return getOutput(files);
+    };
 }
 export default validFileValibot;

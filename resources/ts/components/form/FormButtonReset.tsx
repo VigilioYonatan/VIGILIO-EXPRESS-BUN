@@ -1,4 +1,4 @@
-import { type FieldValues, type UseFormReturn } from "react-hook-form";
+import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { FormControlContext } from "./Form";
 import { useContext } from "preact/hooks";
 function FormButtonReset<T extends object>() {

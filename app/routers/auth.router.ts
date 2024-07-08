@@ -1,3 +1,3 @@
-import { type Type } from "@decorators/di/lib/src/types";
+import { type Type } from "@vigilio/express-core";
 
 export const authRouters: Type[] = [];

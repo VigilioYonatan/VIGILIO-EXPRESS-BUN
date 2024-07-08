@@ -1,4 +1,4 @@
-import { type Type } from "@decorators/di/lib/src/types";
+import { type Type } from "@vigilio/express-core";
 import { AppController } from "@/app.controller";
 
 export const webRouters: Type[] = [AppController];

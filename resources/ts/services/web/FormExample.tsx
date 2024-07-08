@@ -13,20 +13,18 @@ import {
     omit,
     string,
     toTrimmed,
-} from "valibot";
+} from "@vigilio/valibot";
 import Form from "~/components/form";
 import validFileValibot, { valibotVigilio } from "~/libs/valibot";
 
 const user = object({
     id: string(),
-    name: string("Este campo es obligatorio.", [
+    name: string([
         toTrimmed(), // toTrimmed() elimina los espacios en blanco de los costados
-        minLength(3, "Mínimo 3 carácteres."),
+        minLength(3),
     ]),
-    age: number("Este campo es obligatorio.", [
-        minValue(18, "Minimo 18 de edad."),
-    ]),
-    image: array(instance(File), "Este campo es obligatorio.", [
+    age: number([minValue(18, "Minimo 18 de edad.")]),
+    image: array(instance(File), [
         validFileValibot({
             required: false,
             min: 1, // min files
@@ -34,7 +32,7 @@ const user = object({
             // types:["image/jpg"]
         }),
     ]),
-    enabled: boolean("Este campo es obligatorio"),
+    enabled: boolean(),
 });
 export type User = Input<typeof user>;
 
@@ -132,7 +130,9 @@ function FormExample() {
                         // more props: ico, isloading,disabled..etc
                     />
                 </div>
-                <code>{JSON.stringify(usersStoreForm.getValues())}</code>
+                <span>
+                    {JSON.stringify(usersStoreForm.getValues(), null, 3)}
+                </span>
             </Form>
             <div class="flex-1">
                 <h3 class="text-center font-bold text-white ">
@@ -196,7 +196,6 @@ function UserCard({ user, onUserDelete, onUserUpdate }: UserCardProps) {
                 <div class="flex gap-2">
                     <button
                         class="bg-orange-600 px-4 py-1 rounded-md text-white"
-                        type="button"
                         aria-label="update user"
                         onClick={() => onUserUpdate(user)}
                     >

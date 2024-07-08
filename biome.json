@@ -12,11 +12,14 @@
             },
             "a11y": { "useKeyWithClickEvents": "off" },
             "style": {
-                "noNonNullAssertion": "off"
+                "noNonNullAssertion": "off",
+                "useImportType": "off"
             },
-            "nursery": {
-                "noUnusedImports": "error"
-            }
+            "correctness": {
+                "noUnusedImports": "error",
+                "useExhaustiveDependencies": "off"
+            },
+            "security": { "noDangerouslySetInnerHtml": "off" }
         }
     },
     "javascript": {
