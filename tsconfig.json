@@ -17,7 +17,7 @@
         "noImplicitAny": true,
         "verbatimModuleSyntax": true,
         "noUnusedParameters": true,
-        "skipLibCheck": false,
+        "skipLibCheck": true,
         "baseUrl": ".",
         "paths": {
             "@/*": ["./app/services/*"],

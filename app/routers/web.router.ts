@@ -1,4 +1,4 @@
 import { type Type } from "@vigilio/express-core";
-import { AppController } from "@/app.controller";
+import { WebController } from "@/web/controllers/web.controller";
 
-export const webRouters: Type[] = [AppController];
+export const webRouters: Type[] = [WebController];
